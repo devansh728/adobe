@@ -1,0 +1,30 @@
+FROM --platform=linux/amd64 python:3.10-slim
+
+WORKDIR /app
+
+# Install system dependencies for PyMuPDF, scikit-learn, and spaCy
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+        gcc \
+        build-essential \
+        python3-dev \
+        libglib2.0-0 \
+        libsm6 \
+        libxext6 \
+        libxrender-dev \
+    && rm -rf /var/lib/apt/lists/*
+
+# Copy minimal requirements for Challenge 1B
+COPY requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
+# Download spaCy English model (if needed)
+RUN python -m spacy download en_core_web_sm
+
+# Copy code and data for Challenge 1B
+COPY outline_extractor/ ./outline_extractor/
+COPY challenge_1b_processor_simple.py ./
+COPY challenge_1b_processor.py ./
+COPY Adobe-India-Hackathon25/Challenge_1b/ ./Adobe-India-Hackathon25/Challenge_1b/
+
+ENTRYPOINT ["python", "challenge_1b_processor_simple.py"]
